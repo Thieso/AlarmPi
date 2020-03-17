@@ -180,4 +180,4 @@ if __name__ == '__main__':
         main()
     finally:
         print('Cleaning up')
-        GPIO.cleanup();
+        GPIO.cleanup()
