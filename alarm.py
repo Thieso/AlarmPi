@@ -72,10 +72,6 @@ def main():
             hour = newHour
             contrast = getContrast(hour)
             device.contrast(contrast)
-            # just for testing
-            serial = spi(port=0, device=0, gpio=noop())
-            device = max7219(serial, cascaded=4, block_orientation=0, rotate=2)
-            virtual = viewport(device, width=32, height=8)
 
         if timeString == alarmString and STATE != 3:
             STATE = 3
