@@ -50,6 +50,9 @@ class Alarm:
         # read alarm from file
         self.read_alarm_from_file()
 
+        # set initial contrast
+        self.device.contrast(self.contrast)
+
         while True:
             # sleep for the blink time
             time.sleep(self.blink_time)
@@ -157,12 +160,11 @@ class Alarm:
 
     def getContrast(self, hour):
         '''Returns the contrast for the LED matrix based on hour'''
-        b = 4.58e-3
-        c = -2.19e-1
-        d = 2.63
-        f = 5
-        contrast = b*pow(hour, 4) + c*pow(hour, 3) + d*pow(hour, 2) + f
-        return min(int(contrast), 100)
+        if hour >= 20 or hour <= 7:
+            contrast = 5
+        else:
+            contrast = 50
+        return contrast
 
     def display_text(self, text_string):
         '''Display text on the LED matrix'''
