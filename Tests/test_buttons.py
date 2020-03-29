@@ -1,9 +1,12 @@
+#!/usr/bin/python3
 import time
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 
-mode_button = 11
-up_button = 13
-down_button = 15
+# quick test to see whether the buttons work properly
+
+mode_button = 29
+up_button = 31
+down_button = 33
 
 def button1_callback(channel):
     global start

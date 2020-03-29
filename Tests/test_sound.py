@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import pygame
 pygame.mixer.init()
 pygame.mixer.music.load("../../alarm_sound.wav")
