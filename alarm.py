@@ -17,8 +17,8 @@ def main():
 
     # define buttons for gpio input
     mode_button = 29
-    up_button = 37
-    down_button = 15
+    up_button = 31
+    down_button = 33
 
     # define serial and device in order to interact with the LED matrix
     serial = spi(port=0, device=0, gpio=noop())
@@ -31,7 +31,7 @@ def main():
     # setup buttons
     GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
     GPIO.setup(mode_button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(up_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(up_button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(down_button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     bounce_time = 200

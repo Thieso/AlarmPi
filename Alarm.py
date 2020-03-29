@@ -9,7 +9,7 @@ class Alarm:
         self.hours = 6
         self.minutes = 30
         self.state = 0
-        self.blinkTime = 0.5
+        self.blink_time = 0.5
         self.contrast = 10
         self.virtual = virtual
         self.device = device
@@ -21,10 +21,10 @@ class Alarm:
 
         while True:
             # sleep for the blink time
-            time.sleep(blinkTime)
+            time.sleep(self.blink_time)
 
             # set time string
-            new_time_string = time.strftime('%H%M')
+            time_string = time.strftime('%H%M')
 
             # set alarm string for the right time
             hour_string = str(self.hours).zfill(2)
@@ -38,7 +38,8 @@ class Alarm:
                 self.contrast = self.getContrast(hour)
                 self.device.contrast(self.contrast)
 
-            if time_string == alarm_string and self.state != 3:
+            if time_string == alarm_string:
+                self.sounded_alarm = True
                 self.state = 3
                 print("Sounding Alarm")
                 self.display_text(alarm_string)
@@ -50,19 +51,18 @@ class Alarm:
 
             # display information depending on the state
             if self.state == 0:
-                time_string = new_time_string
                 # display time on display
                 self.display_text(time_string)
             elif self.state == 1:
                 # blink the hours on the display
                 self.display_text(alarm_string)
-                time.sleep(self.blinkTime)
+                time.sleep(self.blink_time)
                 alarm_string = "--" + str(self.minutes).zfill(2)
                 self.display_text(alarm_string)
             elif self.state == 2:
                 # blink the minutes on the display
                 self.display_text(alarm_string)
-                time.sleep(self.blinkTime)
+                time.sleep(self.blink_time)
                 alarm_string = str(self.hours).zfill(2) + "--"
                 self.display_text(alarm_string)
 
@@ -112,10 +112,6 @@ class Alarm:
                 pygame.mixer.music.pause()
                 break
 
-    def alarm_loop(self):
-        while True:
-            time.sleep(blinkTime)
-
     def set_contrast(self, new_contrast):
         self.device.contrast(new_contrast)
 
@@ -127,7 +123,6 @@ class Alarm:
         contrast = b*pow(self.hours,4) + c*pow(self.hours,3) + d*pow(self.hours,2) + f
         return min(int(contrast), 100)
 
-    def display_text(self, text):
+    def display_text(self, text_string):
         with canvas(self.virtual) as draw:
-            text(draw, (1, 0), text, fill="white")
-
+            text(draw, (1, 0), text_string, fill="white")
