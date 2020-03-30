@@ -8,7 +8,7 @@ Simple alarm clock using the following components
 * Loudspeaker
 * Sound Amplifier
 
-## Python libraries
+## Dependencies 
 
 For the LED matrix programming, the luma library is used, for installation
 instructions see https://luma-led-matrix.readthedocs.io/en/latest/ 
@@ -19,13 +19,15 @@ For the sound output the pygame library is used, for more information see https:
 
 Wiring is done according to the individual component pinout diagrams. Important
 is that the raspberry pi its own power supply because when using the same as the
-LED matrix there is an undervoltage issue and the pi will not start up.
+LED matrix there is an undervoltage issue and the pi will not start up. Another
+option is to use a boost DC-DC converter to power everything from the same power
+supply.
 
 ## Sound file
 
 The sound file used needs to be called `alarm_sound.wav` and must be placed in
-the parent directory of the git directory. In general it is easy to change this
-in the code in `alarm.py` to use different sound files. 
+the working directory. In general it is easy to change this in the code in
+`alarm.py` to use different sound files. 
 
 ## Alarm time file
 
