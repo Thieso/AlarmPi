@@ -11,7 +11,6 @@ class Alarm:
         self.alarm_hour = 6
         self.alarm_minutes = 30
         self.alarm_string = "0630"
-        self.update_alarm_string()
         self.state = 0
         self.blink_time = 0.25
         self.contrast = 10
@@ -20,19 +19,18 @@ class Alarm:
         self.filename = "alarm_time"
         self.date_interval = 10
         self.is_daytime = True
+        # set initial contrast
+        self.getContrast(int(time.strftime('%H')))
+        self.device.contrast(self.contrast)
+        # read alarm string from file and update alarm string
+        self.read_alarm_from_file()
+        self.update_alarm_string()
 
     def alarm_loop(self):
         '''Loop for the alarm clock'''
         # initialze hour and time string
         hour = 0
-        time_string = 0
-
-        # update alarm string
-        self.update_alarm_string()
-
-        # set initial contrast
-        self.getContrast(hour)
-        self.device.contrast(self.contrast)
+        time_string = ""
 
         while True:
             # sleep for the blink time
@@ -63,7 +61,7 @@ class Alarm:
             if self.state == 0:
                 # display time on display and every date_interval seconds display the date
                 seconds = int(time.localtime().tm_sec % 60)
-                if  seconds % self.date_interval == 0 and self.is_daytime is False:
+                if  seconds % self.date_interval == 0 and self.is_daytime is True:
                     self.scroll_text(time.strftime('%b %d'))
                 else:
                     self.display_text(time_string)
@@ -82,19 +80,26 @@ class Alarm:
 
     def read_alarm_from_file(self):
         '''Reads alarm string from file'''
-        fd = open(self.filename, "r")
-        self.alarm_string = fd.read()
-        self.alarm_hour = int(self.alarm_string[0:2])
-        self.alarm_minutes = int(self.alarm_string[2:4])
-        print("Read alarm from file: " + str(self.alarm_hour) + ":" + str(self.alarm_minutes))
-        fd.close()
+        try:
+            fd = open(self.filename, "r")
+            read_string = fd.read()
+            self.alarm_string = read_string
+            self.alarm_hour = int(self.alarm_string[0:2])
+            self.alarm_minutes = int(self.alarm_string[2:4])
+            print("Read alarm from file: " + str(self.alarm_hour) + ":" + str(self.alarm_minutes))
+            fd.close()
+        except:
+            print("File not found, please create alarm_string file")
 
     def write_alarm_to_file(self):
         '''Write alarm string to file'''
-        fd = open(self.filename, "w")
-        print("Writing alarm to file: " + self.alarm_string)
-        fd.write(self.alarm_string)
-        fd.close()
+        try:
+            fd = open(self.filename, "w")
+            print("Writing alarm to file: " + self.alarm_string)
+            fd.write(self.alarm_string)
+            fd.close()
+        except:
+            print("File not found, please create alarm_string file")
 
     def update_alarm_string(self):
         '''Create the alarm string from the integers that indicate the alarm
