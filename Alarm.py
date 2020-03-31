@@ -3,6 +3,7 @@ import time
 import pygame
 from luma.core.render import canvas
 from luma.core.legacy import text, show_message
+from luma.core.virtual import viewport
 
 class Alarm:
     def __init__(self, virtual, device):
@@ -12,7 +13,7 @@ class Alarm:
         self.alarm_string = "0630"
         self.update_alarm_string()
         self.state = 0
-        self.blink_time = 0.5
+        self.blink_time = 0.25
         self.contrast = 10
         self.virtual = virtual
         self.device = device
@@ -47,8 +48,8 @@ class Alarm:
         hour = 0
         time_string = 0
 
-        # read alarm from file
-        self.read_alarm_from_file()
+        # update alarm string
+        self.update_alarm_string()
 
         # set initial contrast
         self.device.contrast(self.contrast)
@@ -80,8 +81,11 @@ class Alarm:
 
             # display information depending on the state
             if self.state == 0:
-                # display time on display
-                self.display_text(time_string)
+                if int(time.localtime().tm_sec % 60) % 10 == 0:
+                    self.scroll_text(time.strftime('%b %d'))
+                else:
+                    # display time on display
+                    self.display_text(time_string)
             elif self.state == 1:
                 # blink the alarm_hour on the display
                 self.display_text(self.alarm_string)
@@ -146,7 +150,7 @@ class Alarm:
         '''Sounds the alarm using the pygame module, stops when the state
         changes'''
         pygame.mixer.init()
-        pygame.mixer.music.load("../alarm_sound.wav")
+        pygame.mixer.music.load("./alarm_sound.wav")
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy() == True:
             if self.state != 3:
@@ -169,4 +173,21 @@ class Alarm:
     def display_text(self, text_string):
         '''Display text on the LED matrix'''
         with canvas(self.virtual) as draw:
-            text(draw, (1, 0), text_string, fill="white")
+            for i, word in enumerate(text_string):
+                text(draw, (1, i*8), word, fill="white")
+
+    def scroll_text(self, text_string):
+        '''Scroll text on the LED matrix'''
+        # set new viewport which fits the whole string
+        virtual = viewport(self.device, width=8,
+                height=len(text_string) * 8)
+        # draw the string in intial position on the viewport
+        with canvas(virtual) as draw:
+            for i, word in enumerate(text_string):
+                text(draw, (1, i*8), word, fill="white")
+        time.sleep(0.5)
+        # scroll the string by offsetting the viewport
+        for offset in range(virtual.height - self.device.height):
+            virtual.set_position((0, offset))
+            time.sleep(0.05)
+

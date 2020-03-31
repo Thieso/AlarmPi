@@ -16,8 +16,8 @@ def main():
 
     # define serial and device in order to interact with the LED matrix
     serial = spi(port=0, device=0, gpio=noop())
-    device = max7219(serial, cascaded=4, block_orientation=0, rotate=2)
-    virtual = viewport(device, width=32, height=8)
+    device = max7219(serial, cascaded=4, block_orientation=-90, rotate=1)
+    virtual = viewport(device, width=8, height=32)
 
     # create instance of Alarm
     alarm = Alarm(virtual, device)
@@ -29,7 +29,7 @@ def main():
     GPIO.setup(down_button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     # bounce time for the buttons so that they work properly
-    bounce_time = 200
+    bounce_time = 300
     # setup callbacks for the buttons with pull down logic
     GPIO.add_event_detect(mode_button, GPIO.RISING, callback=alarm.state_callback, bouncetime=bounce_time)
     GPIO.add_event_detect(up_button, GPIO.RISING, callback=alarm.inc_callback, bouncetime=bounce_time)
