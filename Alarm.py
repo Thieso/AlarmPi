@@ -18,6 +18,67 @@ class Alarm:
         self.virtual = virtual
         self.device = device
         self.filename = "alarm_time"
+        self.date_interval = 10
+        self.is_daytime = True
+
+    def alarm_loop(self):
+        '''Loop for the alarm clock'''
+        # initialze hour and time string
+        hour = 0
+        time_string = 0
+
+        # update alarm string
+        self.update_alarm_string()
+
+        # set initial contrast
+        self.getContrast(hour)
+        self.device.contrast(self.contrast)
+
+        while True:
+            # sleep for the blink time
+            time.sleep(self.blink_time)
+
+            # set time string
+            time_string = time.strftime('%H%M')
+
+            # set contrast based on time
+            new_hour = int(time.strftime('%H'))
+            if hour != new_hour:
+                hour = new_hour
+                self.getContrast(hour)
+                self.device.contrast(self.contrast)
+
+            if time_string == self.alarm_string:
+                self.sounded_alarm = True
+                self.state = 3
+                print("Sounding Alarm")
+                self.display_text(self.alarm_string)
+                self.sound_alarm()
+                # blink all the numbers during alarm sounding
+                # in order to not ring again wait till minute passed
+                while time.strftime('%H%M') == self.alarm_string:
+                    time.sleep(1)
+
+            # display information depending on the state
+            if self.state == 0:
+                # display time on display and every date_interval seconds display the date
+                seconds = int(time.localtime().tm_sec % 60)
+                if  seconds % self.date_interval == 0 and self.is_daytime is False:
+                    self.scroll_text(time.strftime('%b %d'))
+                else:
+                    self.display_text(time_string)
+            elif self.state == 1:
+                # blink the alarm_hour on the display
+                self.display_text(self.alarm_string)
+                time.sleep(self.blink_time)
+                tmp_string = "--" + str(self.alarm_minutes).zfill(2)
+                self.display_text(tmp_string)
+            elif self.state == 2:
+                # blink the alarm_minutes on the display
+                self.display_text(self.alarm_string)
+                time.sleep(self.blink_time)
+                tmp_string = str(self.alarm_hour).zfill(2) + "--"
+                self.display_text(tmp_string)
 
     def read_alarm_from_file(self):
         '''Reads alarm string from file'''
@@ -42,62 +103,6 @@ class Alarm:
         minute_string = str(self.alarm_minutes).zfill(2)
         self.alarm_string = hour_string + minute_string
 
-    def alarm_loop(self):
-        '''Loop for the alarm clock'''
-        # initialze hour and time string
-        hour = 0
-        time_string = 0
-
-        # update alarm string
-        self.update_alarm_string()
-
-        # set initial contrast
-        self.device.contrast(self.contrast)
-
-        while True:
-            # sleep for the blink time
-            time.sleep(self.blink_time)
-
-            # set time string
-            time_string = time.strftime('%H%M')
-
-            # set contrast based on time
-            new_hour = int(time.strftime('%H'))
-            if hour != new_hour:
-                hour = new_hour
-                self.contrast = self.getContrast(hour)
-                self.device.contrast(self.contrast)
-
-            if time_string == self.alarm_string:
-                self.sounded_alarm = True
-                self.state = 3
-                print("Sounding Alarm")
-                self.display_text(self.alarm_string)
-                self.sound_alarm()
-                # blink all the numbers during alarm sounding
-                # in order to not ring again wait till minute passed
-                while time.strftime('%H%M') == self.alarm_string:
-                    time.sleep(1)
-
-            # display information depending on the state
-            if self.state == 0:
-                if int(time.localtime().tm_sec % 60) % 10 == 0:
-                    self.scroll_text(time.strftime('%b %d'))
-                else:
-                    # display time on display
-                    self.display_text(time_string)
-            elif self.state == 1:
-                # blink the alarm_hour on the display
-                self.display_text(self.alarm_string)
-                time.sleep(self.blink_time)
-                tmp_string = "--" + str(self.alarm_minutes).zfill(2)
-                self.display_text(tmp_string)
-            elif self.state == 2:
-                # blink the alarm_minutes on the display
-                self.display_text(self.alarm_string)
-                time.sleep(self.blink_time)
-                tmp_string = str(self.alarm_hour).zfill(2) + "--"
-                self.display_text(tmp_string)
 
     def state_callback(self, channel):
         '''Callback for the button which changes the state, increments the state
@@ -165,10 +170,11 @@ class Alarm:
     def getContrast(self, hour):
         '''Returns the contrast for the LED matrix based on hour'''
         if hour >= 20 or hour <= 7:
-            contrast = 5
+            self.contrast = 5
+            self.is_daytime = False
         else:
-            contrast = 50
-        return contrast
+            self.contrast = 50
+            self.is_daytime = True
 
     def display_text(self, text_string):
         '''Display text on the LED matrix'''
