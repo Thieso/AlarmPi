@@ -15,6 +15,8 @@ instructions see https://luma-led-matrix.readthedocs.io/en/latest/
 
 For the sound output the pygame library is used, for more information see https://www.pygame.org/
 
+For the text to speech output, the pyttsx3 library is used
+
 ## Wiring
 
 Wiring is done according to the individual component pinout diagrams. Important
@@ -25,16 +27,15 @@ supply.
 
 ## Sound file
 
-The sound file used needs to be called `alarm_sound.wav` and must be placed in
-the working directory. In general it is easy to change this in the code in
-`alarm.py` to use different sound files. 
+The sound file can be set in `Alarm.py` with the attribute `alarm_sound_file`
 
 ## Alarm time file
 
-For the code to work, it is assumed that there is a `alarm_time` file with the
-alarm time as its content in the current directory. The format of the content is
-simply `<hours(with possible leading zero)><minutes(with possible leading
-zero)>`. For example for an alarm at 8:05 the content needs to be 0805.
+For the code to work, it is assumed that there is a file containing the alarm
+time. The format of the content is simply `<hours(with possible leading
+zero)><minutes(with possible leading zero)>`. For example for an alarm at 8:05
+the content needs to be 0805. The file location and name can be set in
+`Alarm.py` with the attribute `filename`
 
 ## Buttons
 

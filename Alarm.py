@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import time
 import pygame
+import pyttsx3
 from luma.core.render import canvas
 from luma.core.legacy import text, show_message
 from luma.core.virtual import viewport
@@ -16,21 +17,58 @@ class Alarm:
         self.contrast = 10
         self.virtual = virtual
         self.device = device
-        self.filename = "alarm_time"
+        self.filename = "/home/pi/Alarm/alarm_time"
         self.date_interval = 10
         self.is_daytime = True
+        self.alarm_sound_file = "/home/pi/Alarm/alarm_sound.wav"
         # set initial contrast
         self.getContrast(int(time.strftime('%H')))
         self.device.contrast(self.contrast)
         # read alarm string from file and update alarm string
         self.read_alarm_from_file()
         self.update_alarm_string()
+        self.nth = {
+            1: "first",
+            2: "second",
+            3: "third",
+            4: "fourth",
+            5: "fifth",
+            6: "sixth",
+            7: "seventh",
+            8: "eighth",
+            9: "ninth",
+            10: "tenth",
+            11: "eleventh",
+            12: "twelfth",
+            13: "thirteenth",
+            14: "fourteenth",
+            15: "fifteenth",
+            16: "sixteenth",
+            17: "seventeenth",
+            18: "eighteenth",
+            19: "nineteenth",
+            20: "twentieth",
+            21: "twenty-first",
+            22: "twenty-second",
+            23: "twenty-third",
+            24: "twenty-fourth",
+            25: "twenty-fifth",
+            26: "twenty-sixth",
+            27: "twenty-seventh",
+            28: "twenty-eighth",
+            29: "twenty-ninth",
+            30: "thirtyth",
+            31: "thirty-first",
+        }
 
     def alarm_loop(self):
         '''Loop for the alarm clock'''
         # initialze hour and time string
         hour = 0
         time_string = ""
+
+        # initialize tts engine
+        self.engine = pyttsx3.init()
 
         while True:
             # sleep for the blink time
@@ -52,7 +90,15 @@ class Alarm:
                 print("Sounding Alarm")
                 self.display_text(self.alarm_string)
                 self.sound_alarm()
-                # blink all the numbers during alarm sounding
+                time.sleep(2)
+                # say a nice good morning message
+                weekday = time.strftime('%A')
+                number = self.nth[int(time.strftime('%e'))]
+                months = time.strftime('%B')
+                hours = time.strftime('%H')
+                minutes = time.strftime('%M')
+                tts_string = "Good Morning, today is " + weekday + " the " + number + " of " + months + ". It is " + hours + " " + minutes
+                self.text_to_speech(tts_string)
                 # in order to not ring again wait till minute passed
                 while time.strftime('%H%M') == self.alarm_string:
                     time.sleep(1)
@@ -62,7 +108,9 @@ class Alarm:
                 # display time on display and every date_interval seconds display the date
                 seconds = int(time.localtime().tm_sec % 60)
                 if  seconds % self.date_interval == 0 and self.is_daytime is True:
-                    self.scroll_text(time.strftime('%b %d'))
+                    months = time.strftime('%b %d')
+                    scroll_text = time_string + " " + months.upper()  + " " + time_string
+                    self.scroll_text(scroll_text)
                 else:
                     self.display_text(time_string)
             elif self.state == 1:
@@ -86,17 +134,17 @@ class Alarm:
             self.alarm_string = read_string
             self.alarm_hour = int(self.alarm_string[0:2])
             self.alarm_minutes = int(self.alarm_string[2:4])
-            print("Read alarm from file: " + str(self.alarm_hour) + ":" + str(self.alarm_minutes))
             fd.close()
+            print("Read alarm from file: " + str(self.alarm_hour) + ":" + str(self.alarm_minutes))
         except:
             print("File not found, please create alarm_string file")
 
     def write_alarm_to_file(self):
         '''Write alarm string to file'''
         try:
-            fd = open(self.filename, "w")
             print("Writing alarm to file: " + self.alarm_string)
-            fd.write(self.alarm_string)
+            fd = open(self.filename, "w")
+            fd.write(self.alarm_string + "\n")
             fd.close()
         except:
             print("File not found, please create alarm_string file")
@@ -160,7 +208,7 @@ class Alarm:
         '''Sounds the alarm using the pygame module, stops when the state
         changes'''
         pygame.mixer.init()
-        pygame.mixer.music.load("./alarm_sound.wav")
+        pygame.mixer.music.load(self.alarm_sound_file)
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy() == True:
             if self.state != 3:
@@ -177,8 +225,11 @@ class Alarm:
         if hour >= 20 or hour <= 7:
             self.contrast = 5
             self.is_daytime = False
-        else:
+        elif hour <= 10 or hour >= 17:
             self.contrast = 50
+            self.is_daytime = True
+        else:
+            self.contrast = 100
             self.is_daytime = True
 
     def display_text(self, text_string):
@@ -196,9 +247,13 @@ class Alarm:
         with canvas(virtual) as draw:
             for i, word in enumerate(text_string):
                 text(draw, (1, i*8), word, fill="white")
-        time.sleep(0.5)
         # scroll the string by offsetting the viewport
-        for offset in range(virtual.height - self.device.height):
+        for offset in range(virtual.height - self.device.height + 1):
             virtual.set_position((0, offset))
             time.sleep(0.05)
 
+    def text_to_speech(self, tts_string):
+        self.engine.say(tts_string)
+        self.engine.setProperty('rate',20) # words per minute
+        self.engine.setProperty('volume',0.9)
+        self.engine.runAndWait()
