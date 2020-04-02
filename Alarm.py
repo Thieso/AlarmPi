@@ -108,8 +108,8 @@ class Alarm:
                 # display time on display and every date_interval seconds display the date
                 seconds = int(time.localtime().tm_sec % 60)
                 if  seconds % self.date_interval == 0 and self.is_daytime is True:
-                    months = time.strftime('%b %d')
-                    scroll_text = time_string + " " + months.upper()  + " " + time_string
+                    months = time.strftime('%b') + " " + str(int(time.strftime('%d')))
+                    scroll_text = time_string + "-" + months.upper()  + "-" + time_string
                     self.scroll_text(scroll_text)
                 else:
                     self.display_text(time_string)
@@ -236,7 +236,7 @@ class Alarm:
         '''Display text on the LED matrix'''
         with canvas(self.virtual) as draw:
             for i, word in enumerate(text_string):
-                text(draw, (1, i*8), word, fill="white")
+                text(draw, (1, i * 8 + 1), word, fill="white")
 
     def scroll_text(self, text_string):
         '''Scroll text on the LED matrix'''
@@ -246,14 +246,18 @@ class Alarm:
         # draw the string in intial position on the viewport
         with canvas(virtual) as draw:
             for i, word in enumerate(text_string):
-                text(draw, (1, i*8), word, fill="white")
-        # scroll the string by offsetting the viewport
+                text(draw, (1, i * 8 + 1), word, fill="white")
+        # scroll the string by offsetting the viewport, intterupt if state
+        # changes
         for offset in range(virtual.height - self.device.height + 1):
-            virtual.set_position((0, offset))
-            time.sleep(0.05)
+            if self.state == 0:
+                virtual.set_position((0, offset))
+                time.sleep(0.05)
+            else:
+                break
 
     def text_to_speech(self, tts_string):
-        self.engine.say(tts_string)
-        self.engine.setProperty('rate',20) # words per minute
+        self.engine.setProperty('rate',120) # words per minute
         self.engine.setProperty('volume',0.9)
+        self.engine.say(tts_string)
         self.engine.runAndWait()

@@ -43,7 +43,7 @@ number = time.strftime('%e')
 number = nth[int(number)]
 months = time.strftime('%B')
 tts_string = "Good Morning, today is " + weekday + " the " + number + " of " + months
-engine.say(tts_string)
-engine.setProperty('rate',20) # words per minute
+engine.setProperty('rate',120) # words per minute
 engine.setProperty('volume',0.9)
+engine.say(tts_string)
 engine.runAndWait()
