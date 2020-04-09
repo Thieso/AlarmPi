@@ -85,7 +85,6 @@ class Alarm:
                 self.device.contrast(self.contrast)
 
             if time_string == self.alarm_string:
-                self.sounded_alarm = True
                 self.state = 3
                 print("Sounding Alarm")
                 self.display_text(self.alarm_string)
