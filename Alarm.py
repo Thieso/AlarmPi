@@ -20,7 +20,9 @@ class Alarm:
         self.filename = "/home/pi/Alarm/alarm_time"
         self.date_interval = 10
         self.is_daytime = True
-        self.alarm_sound_file = "/home/pi/Alarm/alarm_sound.wav"
+        self.alarm_sound_file = "/home/pi/Alarm/aufstehn.mp3"
+        self.alarm_on = True
+        self.alarm_state_changed = False
         # set initial contrast
         self.getContrast(int(time.strftime('%H')))
         self.device.contrast(self.contrast)
@@ -84,7 +86,16 @@ class Alarm:
                 self.getContrast(hour)
                 self.device.contrast(self.contrast)
 
-            if time_string == self.alarm_string:
+            # display a change in alarm state (turning it on or off)
+            if self.alarm_state_changed is True:
+                if self.alarm_on is True:
+                    self.display_text("ON")
+                else:
+                    self.display_text("OFF")
+                time.sleep(1.5)
+                self.alarm_state_changed = False
+
+            if time_string == self.alarm_string and self.alarm_on is True:
                 self.state = 3
                 print("Sounding Alarm")
                 self.display_text(self.alarm_string)
@@ -165,6 +176,10 @@ class Alarm:
             # write it to the file
             self.write_alarm_to_file()
             self.state = 0
+            # if alarm is off turn it on
+            if self.alarm_on is False:
+                self.alarm_on = True
+                self.alarm_state_changed = True
         else:
             self.state = self.state + 1
         print("State: " + str(self.state).zfill(2))
@@ -188,8 +203,14 @@ class Alarm:
 
     def dec_callback(self, channel):
         '''Callback for the decrease button to decrease the alarm hour or
-        minutes'''
-        if self.state == 1:
+        minutes, if in state 0 it can be used to turn on or off the alarm'''
+        if self.state == 0:
+            self.alarm_state_changed = True
+            if self.alarm_on is True:
+                self.alarm_on = False
+            else:
+                self.alarm_on = True
+        elif self.state == 1:
             if self.alarm_hour - 1 < 0:
                 self.alarm_hour = 23
             else:
@@ -249,7 +270,7 @@ class Alarm:
         # scroll the string by offsetting the viewport, intterupt if state
         # changes
         for offset in range(virtual.height - self.device.height + 1):
-            if self.state == 0:
+            if self.state == 0 and self.alarm_state_changed is False:
                 virtual.set_position((0, offset))
                 time.sleep(0.05)
             else:
