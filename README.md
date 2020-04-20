@@ -24,10 +24,10 @@ For volume changing, the alsaaudio library is used.
 ## Wiring
 
 Wiring is done according to the individual component pinout diagrams. Important
-is that the raspberry pi its own power supply because when using the same as the
-LED matrix there is an undervoltage issue and the pi will not start up. Another
-option is to use a boost DC-DC converter to power everything from the same power
-supply.
+is that the raspberry pi has its own power supply because when using the same as
+the LED matrix there is an undervoltage issue and the pi will not start up.
+Another option is to use a boost DC-DC converter to power everything from the
+same power supply.
 
 ## Sound file
 
