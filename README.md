@@ -17,6 +17,8 @@ For the sound output the pygame library is used, for more information see https:
 
 For the text to speech output, the pyttsx3 library is used
 
+For volume changing, the alsaaudio library is used.
+
 ## Wiring
 
 Wiring is done according to the individual component pinout diagrams. Important

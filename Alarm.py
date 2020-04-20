@@ -2,6 +2,7 @@
 import time
 import pygame
 import pyttsx3
+import alsaaudio
 from luma.core.render import canvas
 from luma.core.legacy import text, show_message
 from luma.core.virtual import viewport
@@ -13,6 +14,8 @@ class Alarm:
         self.alarm_minutes = 30
         self.alarm_string = "0630"
         self.state = 0
+        self.audiocontrol = alsaaudio.Mixer(control='Speaker')
+        self.volume = 50
         self.blink_time = 0.25
         self.contrast = 10
         self.virtual = virtual
@@ -24,7 +27,7 @@ class Alarm:
         self.alarm_on = True
         self.alarm_state_changed = False
         # set initial contrast
-        self.getContrast(int(time.strftime('%H')))
+        self.get_contrast(int(time.strftime('%H')))
         self.device.contrast(self.contrast)
         # read alarm string from file and update alarm string
         self.read_alarm_from_file()
@@ -72,6 +75,9 @@ class Alarm:
         # initialize tts engine
         self.engine = pyttsx3.init()
 
+        # set initial volume
+        self.audiocontrol.setvolume(self.volume)
+
         while True:
             # sleep for the blink time
             time.sleep(self.blink_time)
@@ -83,7 +89,7 @@ class Alarm:
             new_hour = int(time.strftime('%H'))
             if hour != new_hour:
                 hour = new_hour
-                self.getContrast(hour)
+                self.get_contrast(hour)
                 self.device.contrast(self.contrast)
 
             # display a change in alarm state (turning it on or off)
@@ -135,6 +141,8 @@ class Alarm:
                 time.sleep(self.blink_time)
                 tmp_string = str(self.alarm_hour).zfill(2) + "--"
                 self.display_text(tmp_string)
+            elif self.state == 4:
+                self.display_volume()
 
     def read_alarm_from_file(self):
         '''Reads alarm string from file'''
@@ -180,25 +188,31 @@ class Alarm:
             if self.alarm_on is False:
                 self.alarm_on = True
                 self.alarm_state_changed = True
+        elif self.state == 4:
+            self.audiocontrol.setvolume(self.volume)
+            self.state = 0
         else:
             self.state = self.state + 1
-        print("State: " + str(self.state).zfill(2))
+        print("State: " + str(self.state))
 
     def inc_callback(self, channel):
         '''Callback for the increase button to increase the alarm hour or
         minutes'''
-        if self.state == 1:
+        if self.state == 0:
+            self.state = 4
+            print("State: " + str(self.state))
+        elif self.state == 1:
             if self.alarm_hour + 1 > 23:
                 self.alarm_hour = 0
             else:
-                self.alarm_hour = self.alarm_hour + 1
-            print("Alarm Hour: " + str(self.alarm_hour).zfill(2))
+                self.alarm_hour += 1
         elif self.state == 2:
             if self.alarm_minutes + 5 > 59:
                 self.alarm_minutes = 0
             else:
-                self.alarm_minutes = self.alarm_minutes + 5
-            print("Alarm Minutes: " + str(self.alarm_minutes).zfill(2))
+                self.alarm_minutes += 5
+        elif self.state == 4:
+            self.volume = min(100, self.volume+10)
         self.update_alarm_string()
 
     def dec_callback(self, channel):
@@ -214,14 +228,14 @@ class Alarm:
             if self.alarm_hour - 1 < 0:
                 self.alarm_hour = 23
             else:
-                self.alarm_hour = self.alarm_hour - 1
-            print("Alarm Hour: " + str(self.alarm_hour).zfill(2))
+                self.alarm_hour -= 1
         elif self.state == 2:
             if self.alarm_minutes - 5 < 0:
                 self.alarm_minutes = 55
             else:
-                self.alarm_minutes = self.alarm_minutes - 5
-            print("Alarm Minutes: " + str(self.alarm_minutes).zfill(2))
+                self.alarm_minutes -= 5
+        elif self.state == 4:
+            self.volume = max(0, self.volume-10)
         self.update_alarm_string()
 
     def sound_alarm(self):
@@ -240,7 +254,7 @@ class Alarm:
         '''Sets the contrast of the LED matrix'''
         self.device.contrast(new_contrast)
 
-    def getContrast(self, hour):
+    def get_contrast(self, hour):
         '''Returns the contrast for the LED matrix based on hour'''
         if hour >= 20 or hour <= 7:
             self.contrast = 5
@@ -275,6 +289,16 @@ class Alarm:
                 time.sleep(0.05)
             else:
                 break
+
+    def display_volume(self):
+        '''Show volume on the LED matrix by filling the screen partially from
+        top to bottom corresponding to the volume'''
+        # set new viewport
+        vp_height = round(self.volume / 100 * 32)
+        # draw the  in intial position on the viewport
+        with canvas(self.virtual) as draw:
+            draw.rectangle((0, 32-vp_height, 8, 32), outline="white", fill="white")
+
 
     def text_to_speech(self, tts_string):
         self.engine.setProperty('rate',120) # words per minute
