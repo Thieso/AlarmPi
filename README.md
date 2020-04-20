@@ -8,6 +8,8 @@ Simple alarm clock using the following components
 * Loudspeaker
 * Sound Amplifier
 
+![](device.jpg?raw=true)
+
 ## Dependencies 
 
 For the LED matrix programming, the luma library is used, for installation
