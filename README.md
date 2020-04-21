@@ -19,7 +19,7 @@ For the sound output the pygame library is used, for more information see https:
 
 For the text to speech output, the pyttsx3 library is used
 
-For volume changing, the alsaaudio library is used.
+For volume changing, the python3-alsaaudio library is used.
 
 ## Wiring
 
@@ -52,3 +52,9 @@ The states are:
 * 1: changing the hour value of the alarm time
 * 2: changing the minute value of the alarm time
 * 3: sounding the alarm
+* 4: Change volume
+
+Note that state 3 is reached automatically when sounding the alarm and state 4
+is reached by pressing the increase button, when in state 0. Both of these states can be left by
+pressing the state button. Additionally, the decrease button, when used in state
+0, turns the alarm on or off. 
