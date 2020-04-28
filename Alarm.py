@@ -113,7 +113,7 @@ class Alarm:
                 months = time.strftime('%B')
                 hours = time.strftime('%H')
                 minutes = time.strftime('%M')
-                tts_string = "Good Morning, today is " + weekday + " the " + number + " of " + months + ". It is " + hours + " " + minutes
+                tts_string = "Good Morning, today is " + weekday + " the " + number + " of " + months + ". It is " + str(int(hours)) + " " + str(int(minutes))
                 self.text_to_speech(tts_string)
                 # in order to not ring again wait till minute passed
                 while time.strftime('%H%M') == self.alarm_string:
