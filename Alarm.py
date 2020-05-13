@@ -17,7 +17,7 @@ class Alarm:
         self.audiocontrol = alsaaudio.Mixer(control='Speaker')
         self.volume = 50
         self.blink_time = 0.25
-        self.contrast = 10
+        self.contrast = 100
         self.virtual = virtual
         self.device = device
         self.filename = "/home/pi/Alarm/alarm_time"
@@ -257,10 +257,10 @@ class Alarm:
     def get_contrast(self, hour):
         '''Returns the contrast for the LED matrix based on hour'''
         if hour >= 20 or hour <= 7:
-            self.contrast = 5
+            self.contrast = 50
             self.is_daytime = False
         elif hour <= 10 or hour >= 17:
-            self.contrast = 50
+            self.contrast = 75
             self.is_daytime = True
         else:
             self.contrast = 100
