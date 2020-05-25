@@ -26,6 +26,9 @@ class Alarm:
         self.alarm_sound_file = "/home/pi/Alarm/aufstehn.mp3"
         self.alarm_on = True
         self.alarm_state_changed = False
+        # init the music mixer
+        pygame.mixer.init()
+        pygame.mixer.music.load(self.alarm_sound_file)
         # set initial contrast
         self.get_contrast(int(time.strftime('%H')))
         self.device.contrast(self.contrast)
@@ -241,8 +244,6 @@ class Alarm:
     def sound_alarm(self):
         '''Sounds the alarm using the pygame module, stops when the state
         changes'''
-        pygame.mixer.init()
-        pygame.mixer.music.load(self.alarm_sound_file)
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy() == True:
             if self.state != 3:
