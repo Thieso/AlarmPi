@@ -243,14 +243,13 @@ class Alarm:
         changes'''
         # init the music mixer
         pygame.init()
-        pygame.mixer.init(frequency=44100, size=-16, channels=1, buffer=512, devicename=None)
+        pygame.mixer.init(frequency=44100, size=-16, channels=1, buffer=512, devicename='Alarm')
         pygame.mixer.music.load(self.alarm_sound_file)
         # play the music
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy() == True:
             if self.state != 3:
                 print("Stopping Alarm")
-                pygame.mixer.music.quit()
                 pygame.quit()
                 break
 
